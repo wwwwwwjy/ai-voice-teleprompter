@@ -5,8 +5,10 @@ PyInstaller 打包配置 — AI语音提词器
 """
 
 from pathlib import Path
+from runpy import run_path
 
 HERE = Path(SPECPATH).resolve()
+APP_VERSION = run_path(str(HERE / "src" / "version.py"))["APP_VERSION"]
 
 # ---- vosk 动态库 ----
 vosk_dylib = None
@@ -61,8 +63,8 @@ app = BUNDLE(
         "CFBundleDevelopmentRegion": "zh_CN",
         "CFBundleDisplayName": "汪同学的AI语音提词器",
         "CFBundleName": "汪同学的AI语音提词器",
-        "CFBundleShortVersionString": "1.0.0",
-        "CFBundleVersion": "1",
+        "CFBundleShortVersionString": APP_VERSION,
+        "CFBundleVersion": APP_VERSION,
         "NSMicrophoneUsageDescription": "我们需要访问您的麦克风来实现语音实时提词跟随功能。",
         "NSHighResolutionCapable": True,
     },

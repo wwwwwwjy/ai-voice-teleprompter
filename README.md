@@ -11,6 +11,12 @@
 - macOS 触控板双指上下滑动
 - macOS 与 Windows 64 位便携版打包配置
 
+## 软件更新
+
+在设置页打开“启动时自动检查更新”，或点击“立即检查更新”。发现新版本后，可选择下载并重启安装。
+
+正式发布使用 `v主版本.次版本.修订号` 标签，并上传对应平台的 ZIP，例如 `ai-voice-teleprompter-v1.0.1-macos-arm64.zip` 和 `ai-voice-teleprompter-v1.0.1-windows-x64.zip`。ZIP 顶层应为完整的 `.app` 或 Windows 便携目录。应用从项目的公开 GitHub Releases 检查版本和校验值。
+
 ## 本地运行
 
 需要 Python 3.12。

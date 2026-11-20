@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import Qt
+from version import APP_VERSION
 
 
 _crash_log_handle = None
@@ -52,6 +53,7 @@ def main():
     _install_crash_logging()
     app = QApplication(sys.argv)
     app.setApplicationName("AI 语音提词器")
+    app.setApplicationVersion(APP_VERSION)
 
     # ---- 立即显示浮窗 ----
     from ui.splash import SplashScreen

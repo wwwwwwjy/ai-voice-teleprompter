@@ -13,11 +13,12 @@ from PyQt6.QtWidgets import (
     QFileDialog, QMessageBox, QFrame, QListWidget, QListWidgetItem,
     QAbstractItemView, QLineEdit, QCheckBox, QInputDialog
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont
 
 from ui.fullscreen import FullscreenWindow
 from ui.settings_dialog import SettingsDialog
+from ui.updates import UpdateController
 from ui.text_preview import TextPreview
 from utils.config import (
     load_config, save_config, save_last_text, load_last_text, get_scripts_dir
@@ -65,6 +66,9 @@ class MainWindow(QMainWindow):
             self._refresh_preview()
 
         self._init_recognizer()
+        self.updater = UpdateController(self)
+        if self._config.get("auto_check_updates", True):
+            QTimer.singleShot(1500, self.updater.check)
 
     # ================================================================
     # 初始化
@@ -782,8 +786,12 @@ class MainWindow(QMainWindow):
 
     def _on_settings(self):
         """打开设置对话框"""
-        dlg = SettingsDialog(self)
-        if not dlg.exec():
+        dlg = SettingsDialog(self, updater=self.updater)
+        accepted = dlg.exec()
+        dlg.deleteLater()
+        if self.updater.dialog is dlg:
+            self.updater.dialog = None
+        if not accepted:
             return
 
         old_model_path = self._config.get("model_path", "")

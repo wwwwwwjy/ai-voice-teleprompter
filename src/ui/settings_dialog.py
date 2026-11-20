@@ -17,6 +17,7 @@ from PyQt6.QtGui import QColor, QPalette, QPixmap
 
 from utils.config import load_config, save_config
 from speech.follower import JUMP_THRESHOLD as DEFAULT_JUMP_THRESHOLD
+from version import APP_VERSION
 
 
 def _resource_path(relative_path: str) -> Path:
@@ -109,8 +110,9 @@ class DonationDialog(QDialog):
 class SettingsDialog(QDialog):
     """设置对话框"""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, updater=None):
         super().__init__(parent)
+        self.updater = updater
         self.setObjectName("SettingsDialog")
         self.setWindowTitle("⚙ 设置")
         self.setMinimumSize(560, 520)
@@ -238,6 +240,27 @@ class SettingsDialog(QDialog):
         form_model.addRow("模型路径:", row_model)
         layout.addWidget(grp_model)
 
+        # ====== 软件更新 ======
+        grp_updates = QGroupBox("🔄 软件更新")
+        form_updates = QFormLayout(grp_updates)
+        form_updates.setContentsMargins(12, 18, 12, 10)
+        self.chk_auto_updates = QCheckBox("启动时自动检查更新")
+        self.chk_auto_updates.setChecked(self._config.get("auto_check_updates", True))
+        form_updates.addRow("", self.chk_auto_updates)
+        self.lbl_update_status = QLabel(f"当前版本：v{APP_VERSION}")
+        self.lbl_update_status.setWordWrap(True)
+        self.btn_check_updates = QPushButton("立即检查更新")
+        self.btn_check_updates.setEnabled(self.updater is not None)
+        if self.updater is not None:
+            self.btn_check_updates.clicked.connect(lambda: self.updater.check(self))
+            self.updater.status_changed.connect(self._update_status)
+            self._update_status(self.updater.status, self.updater.busy)
+        update_row = QHBoxLayout()
+        update_row.addWidget(self.lbl_update_status, 1)
+        update_row.addWidget(self.btn_check_updates)
+        form_updates.addRow("版本状态:", update_row)
+        layout.addWidget(grp_updates)
+
         # ====== 支持作者（内置固定内容，不写入配置） ======
         donation_row = QHBoxLayout()
         donation_row.addStretch()
@@ -313,6 +336,7 @@ class SettingsDialog(QDialog):
         self._config["preserve_line_breaks"] = (
             self.chk_preserve_line_breaks.isChecked())
         self._config["model_path"] = self.line_model_path.text()
+        self._config["auto_check_updates"] = self.chk_auto_updates.isChecked()
 
         save_config(self._config)
         QMessageBox.information(self, "设置已保存",
@@ -321,6 +345,10 @@ class SettingsDialog(QDialog):
 
     def _show_donation_dialog(self):
         DonationDialog(self).exec()
+
+    def _update_status(self, status, busy):
+        self.lbl_update_status.setText(status)
+        self.btn_check_updates.setEnabled(not busy)
 
     def _apply_theme(self):
         palette = QPalette()

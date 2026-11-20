@@ -34,6 +34,7 @@ DEFAULT_CONFIG = {
     "auto_save": True,
     "model_path": "",
     "preserve_line_breaks": True,
+    "auto_check_updates": True,
 }
 
 
